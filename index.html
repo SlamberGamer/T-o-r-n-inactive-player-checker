@@ -355,7 +355,7 @@ const players = PLAYERS.map(p => ({
   id: p.id
 }));
 
-let playerData = players.map(p => ({ ...p, level: null, statusState: null, statusDesc: null, lastAction: null, lastRelative: null, loaded: false, error: false }));
+let playerData = players.map(p => ({ ...p, level: null, statusState: null, statusDesc: null, lastAction: null, lastRelative: null, hospitalUntil: 0, jailUntil: 0, loaded: false, error: false }));
 let currentFilter = 'all';
 let sortCol = null;
 let sortDir = 1;
@@ -387,7 +387,16 @@ function rowHTML(i) {
     else if (state === 'jail') { badgeClass = 'badge-jail'; badgeLabel = 'JAIL'; }
     else if (state === 'traveling' || state === 'abroad') { badgeClass = 'badge-travel'; badgeLabel = 'TRAVELING'; }
     else if (state === 'federal') { badgeClass = 'badge-federal'; badgeLabel = 'FEDERAL'; }
-    statusCell = `<span class="badge ${badgeClass}">${badgeLabel}</span><div class="status-desc">${escHtml(p.statusDesc || '')}</div>`;
+    let timeLeft = '';
+    const now = Math.floor(Date.now() / 1000);
+    if (state === 'hospital' && p.hospitalUntil > now) {
+      const secs = p.hospitalUntil - now;
+      timeLeft = ` <span style="color:var(--accent);font-size:0.7rem">[${fmtTime(secs)}]</span>`;
+    } else if (state === 'jail' && p.jailUntil > now) {
+      const secs = p.jailUntil - now;
+      timeLeft = ` <span style="color:var(--yellow);font-size:0.7rem">[${fmtTime(secs)}]</span>`;
+    }
+    statusCell = `<span class="badge ${badgeClass}">${badgeLabel}</span>${timeLeft}<div class="status-desc">${escHtml(p.statusDesc || '')}</div>`;
   }
 
   let lastCell = '';
@@ -436,6 +445,8 @@ async function fetchAll() {
       playerData[i].statusDesc = data.status?.description || '';
       playerData[i].lastAction = data.last_action?.timestamp || 0;
       playerData[i].lastRelative = data.last_action?.relative || '';
+      playerData[i].hospitalUntil = data.states?.hospital_timestamp || 0;
+      playerData[i].jailUntil = data.states?.jail_timestamp || 0;
       playerData[i].loaded = true;
     } catch(e) {
       playerData[i].error = true;
@@ -452,12 +463,14 @@ async function fetchAll() {
     for (let j = i; j < Math.min(i + BATCH, players.length); j++) batch.push(fetchOne(j));
     await Promise.all(batch);
     await sleep(600); // Rate limit respect
+    autoSort();
   }
 
   fetching = false;
   document.getElementById('fetchBtn').disabled = false;
   document.getElementById('fetchBtn').textContent = '↺ RE-SCAN';
   document.getElementById('progressWrap').classList.remove('show');
+  autoSort();
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -515,6 +528,50 @@ function applyFilters() {
     if (search && !name.includes(search) && !id.includes(search)) show = false;
     row.style.display = show ? '' : 'none';
   });
+}
+
+function fmtTime(secs) {
+  if (secs <= 0) return '0s';
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function statusPriority(p) {
+  const s = (p.statusState || '').toLowerCase();
+  if (s === 'okay') return 0;
+  if (s === 'hospital') return 1;
+  if (s === 'jail') return 2;
+  if (s === 'traveling' || s === 'abroad') return 3;
+  if (s === 'federal') return 4;
+  return 5; // unloaded / unknown
+}
+
+function autoSort() {
+  const now = Math.floor(Date.now() / 1000);
+  playerData.sort((a, b) => {
+    const pa = statusPriority(a), pb = statusPriority(b);
+    if (pa !== pb) return pa - pb;
+    // Within hospital: sort by shortest time remaining first
+    if (pa === 1) {
+      const ta = a.hospitalUntil > now ? a.hospitalUntil - now : 0;
+      const tb = b.hospitalUntil > now ? b.hospitalUntil - now : 0;
+      return ta - tb;
+    }
+    // Within jail: sort by shortest time remaining first
+    if (pa === 2) {
+      const ta = a.jailUntil > now ? a.jailUntil - now : 0;
+      const tb = b.jailUntil > now ? b.jailUntil - now : 0;
+      return ta - tb;
+    }
+    return 0;
+  });
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = playerData.map((_, i) => rowHTML(i)).join('');
+  applyFilters();
 }
 
 function sortBy(col) {
