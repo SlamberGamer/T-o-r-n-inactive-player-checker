@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TORN // Inactive Player Hunter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TORN // Inactive Hunter</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -18,13 +18,10 @@
     --blue: #29b6f6;
     --text: #c8d8e8;
     --muted: #4a6070;
-    --hosp: #ff3c3c;
-    --jail: #ffd600;
-    --okay: #00e676;
-    --travel: #29b6f6;
     --federal: #ff7b00;
+    --radius: 6px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { font-size: 14px; }
   body {
     background: var(--bg);
@@ -33,256 +30,337 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* BG scanlines */
   body::before {
     content: '';
     position: fixed; inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
     pointer-events: none; z-index: 0;
   }
 
-  .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 12px 12px 80px; }
 
-  /* Header */
+  /* ── Header ─────────────────────────────── */
   header {
     text-align: center;
-    padding: 30px 0 20px;
+    padding: 20px 0 16px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
   header h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 2rem;
+    font-size: clamp(1.1rem, 5vw, 2rem);
     font-weight: 900;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.1em;
     color: var(--accent);
-    text-shadow: 0 0 30px rgba(255,60,60,0.5);
+    text-shadow: 0 0 30px rgba(255,60,60,0.4);
   }
   header h1 span { color: var(--text); }
-  header p { color: var(--muted); font-size: 0.8rem; margin-top: 6px; letter-spacing: 0.1em; }
+  header p { color: var(--muted); font-size: 0.7rem; margin-top: 4px; letter-spacing: 0.08em; }
 
-  /* API Key Section */
+  /* ── API bar ─────────────────────────────── */
   .api-bar {
-    display: flex; gap: 10px; align-items: center;
     background: var(--panel);
     border: 1px solid var(--border);
-    padding: 14px 18px;
-    margin-bottom: 20px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: var(--radius);
   }
-  .api-bar label { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.1em; white-space: nowrap; }
+  .api-bar label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .api-bar-row { display: flex; gap: 8px; }
   .api-bar input {
     flex: 1;
+    min-width: 0;
     background: var(--bg);
     border: 1px solid var(--border);
+    border-radius: var(--radius);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
-    padding: 8px 12px;
+    font-size: 1rem;
+    padding: 11px 12px;
     outline: none;
     transition: border-color 0.2s;
   }
   .api-bar input:focus { border-color: var(--accent); }
-  .btn {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    padding: 9px 20px;
-    border: none; cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-  }
   .btn-primary {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 11px 16px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
     background: var(--accent);
     color: #fff;
+    white-space: nowrap;
+    transition: all 0.2s;
+    touch-action: manipulation;
   }
-  .btn-primary:hover { background: #ff5555; box-shadow: 0 0 20px rgba(255,60,60,0.4); }
-  .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; }
+  .btn-primary:hover  { background: #ff5555; box-shadow: 0 0 20px rgba(255,60,60,0.4); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* Stats bar */
+  /* ── Stats bar ───────────────────────────── */
   .stats-bar {
-    display: flex; gap: 12px; flex-wrap: wrap;
-    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
   }
   .stat-chip {
     background: var(--panel);
     border: 1px solid var(--border);
-    padding: 6px 14px;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
+    border-radius: var(--radius);
+    padding: 8px 6px;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1.4;
   }
-  .stat-chip span { font-family: 'Orbitron', sans-serif; font-weight: 700; margin-left: 6px; }
-  .stat-chip.s-ok span { color: var(--green); }
-  .stat-chip.s-hosp span { color: var(--hosp); }
-  .stat-chip.s-jail span { color: var(--yellow); }
-  .stat-chip.s-travel span { color: var(--blue); }
+  .stat-chip span {
+    display: block;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .stat-chip.s-ok span    { color: var(--green); }
+  .stat-chip.s-hosp span  { color: var(--accent); }
+  .stat-chip.s-jail span  { color: var(--yellow); }
+  .stat-chip.s-travel span{ color: var(--blue); }
   .stat-chip.s-total span { color: var(--accent2); }
 
-  /* Filter row */
-  .filter-row {
-    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-    margin-bottom: 14px;
+  /* ── Filter row ──────────────────────────── */
+  .filter-wrap { margin-bottom: 10px; }
+  .filter-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
-  .filter-row input[type="text"] {
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .search-box {
+    width: 100%;
     background: var(--panel);
     border: 1px solid var(--border);
+    border-radius: var(--radius);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
-    padding: 7px 12px;
+    font-size: 1rem;
+    padding: 10px 12px;
     outline: none;
-    width: 200px;
+    margin-bottom: 8px;
   }
-  .filter-row input[type="text"]:focus { border-color: var(--blue); }
+  .search-box:focus { border-color: var(--blue); }
   .filter-btn {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.75rem;
-    padding: 7px 14px;
+    padding: 9px 16px;
     border: 1px solid var(--border);
+    border-radius: 20px;
     background: var(--panel);
     color: var(--muted);
     cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: all 0.15s;
-  }
-  .filter-btn:hover, .filter-btn.active { border-color: currentColor; }
-  .filter-btn.f-all.active { color: var(--text); border-color: var(--text); }
-  .filter-btn.f-okay.active { color: var(--green); border-color: var(--green); background: rgba(0,230,118,0.07); }
-  .filter-btn.f-hosp.active { color: var(--hosp); border-color: var(--hosp); background: rgba(255,60,60,0.07); }
-  .filter-btn.f-jail.active { color: var(--yellow); border-color: var(--yellow); background: rgba(255,214,0,0.07); }
-  .filter-btn.f-travel.active { color: var(--blue); border-color: var(--blue); background: rgba(41,182,246,0.07); }
-
-  /* Progress bar */
-  .progress-wrap {
-    margin-bottom: 14px;
-    display: none;
-  }
-  .progress-wrap.show { display: block; }
-  .progress-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 5px; letter-spacing: 0.08em; }
-  .progress-track {
-    height: 4px; background: var(--border); position: relative;
-  }
-  .progress-fill {
-    height: 100%; background: var(--accent);
-    transition: width 0.3s;
-    box-shadow: 0 0 10px var(--accent);
-    width: 0%;
-  }
-
-  /* Table */
-  .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%; border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-  thead th {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 10px 14px;
-    text-align: left;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    color: var(--muted);
     white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
+    transition: all 0.15s;
+    touch-action: manipulation;
+    flex-shrink: 0;
   }
-  thead th:hover { color: var(--text); }
-  thead th.sort-asc::after { content: ' ▲'; color: var(--accent); }
-  thead th.sort-desc::after { content: ' ▼'; color: var(--accent); }
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
-  tbody td { padding: 10px 14px; border-left: 1px solid var(--border); vertical-align: middle; }
-  tbody td:first-child { border-left: none; }
+  .filter-btn.f-all.active    { color: var(--text);   border-color: var(--text);   background: rgba(200,216,232,0.08); }
+  .filter-btn.f-okay.active   { color: var(--green);  border-color: var(--green);  background: rgba(0,230,118,0.1); }
+  .filter-btn.f-hosp.active   { color: var(--accent); border-color: var(--accent); background: rgba(255,60,60,0.1); }
+  .filter-btn.f-jail.active   { color: var(--yellow); border-color: var(--yellow); background: rgba(255,214,0,0.1); }
+  .filter-btn.f-travel.active { color: var(--blue);   border-color: var(--blue);   background: rgba(41,182,246,0.1); }
 
-  .col-num { color: var(--muted); width: 40px; text-align: center; }
-  .col-name { font-weight: 600; }
-  .col-name a { color: var(--blue); text-decoration: none; }
-  .col-name a:hover { text-decoration: underline; }
-  .col-id { color: var(--muted); }
-  .col-level { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.85rem; }
-  .col-status { max-width: 300px; }
-  .col-last { white-space: nowrap; }
-  .col-action { white-space: nowrap; }
+  /* ── Progress ────────────────────────────── */
+  .progress-wrap { margin-bottom: 12px; display: none; }
+  .progress-wrap.show { display: block; }
+  .progress-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 5px; }
+  .progress-track { height: 4px; background: var(--border); border-radius: 2px; }
+  .progress-fill  { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; box-shadow: 0 0 8px var(--accent); width: 0%; }
 
-  /* Status badges */
+  /* ── Status badges ───────────────────────── */
   .badge {
     display: inline-block;
-    padding: 2px 8px;
-    font-size: 0.7rem;
+    padding: 3px 8px;
+    font-size: 0.65rem;
     font-family: 'Orbitron', sans-serif;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     font-weight: 700;
-    margin-bottom: 3px;
+    border-radius: 3px;
   }
-  .badge-ok { background: rgba(0,230,118,0.15); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
-  .badge-hosp { background: rgba(255,60,60,0.15); color: var(--hosp); border: 1px solid rgba(255,60,60,0.3); }
-  .badge-jail { background: rgba(255,214,0,0.15); color: var(--yellow); border: 1px solid rgba(255,214,0,0.3); }
-  .badge-travel { background: rgba(41,182,246,0.15); color: var(--blue); border: 1px solid rgba(41,182,246,0.3); }
-  .badge-federal { background: rgba(255,123,0,0.15); color: var(--federal); border: 1px solid rgba(255,123,0,0.3); }
-  .badge-unknown { background: rgba(100,100,100,0.15); color: var(--muted); border: 1px solid rgba(100,100,100,0.3); }
+  .badge-ok      { background: rgba(0,230,118,0.15);  color: var(--green);   border: 1px solid rgba(0,230,118,0.3); }
+  .badge-hosp    { background: rgba(255,60,60,0.15);   color: var(--accent);  border: 1px solid rgba(255,60,60,0.3); }
+  .badge-jail    { background: rgba(255,214,0,0.15);   color: var(--yellow);  border: 1px solid rgba(255,214,0,0.3); }
+  .badge-travel  { background: rgba(41,182,246,0.15);  color: var(--blue);    border: 1px solid rgba(41,182,246,0.3); }
+  .badge-federal { background: rgba(255,123,0,0.15);   color: var(--federal); border: 1px solid rgba(255,123,0,0.3); }
+  .badge-unknown { background: rgba(100,100,100,0.15); color: var(--muted);   border: 1px solid rgba(100,100,100,0.3); }
+  .status-desc   { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 
-  .status-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  /* ── MOBILE CARDS (default) ──────────────── */
+  .card-list { display: flex; flex-direction: column; gap: 8px; }
+  .player-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    gap: 6px 10px;
+    align-items: start;
+  }
+  .player-card.state-okay   { border-left: 3px solid var(--green); }
+  .player-card.state-hospital { border-left: 3px solid var(--accent); }
+  .player-card.state-jail   { border-left: 3px solid var(--yellow); }
+  .player-card.state-traveling,
+  .player-card.state-abroad { border-left: 3px solid var(--blue); }
 
-  /* Attack button */
+  .card-top    { grid-column: 1; grid-row: 1; }
+  .card-attack { grid-column: 2; grid-row: 1 / 4; display: flex; align-items: center; }
+  .card-mid    { grid-column: 1; grid-row: 2; }
+  .card-bot    { grid-column: 1; grid-row: 3; }
+
+  .card-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--blue);
+    text-decoration: none;
+    display: block;
+  }
+  .card-name:hover { text-decoration: underline; }
+  .card-id   { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+  .card-meta { font-size: 0.75rem; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+  .card-meta strong { color: var(--accent2); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+  .card-status-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+  .timer-cell { font-size: 0.72rem; }
+
+  /* Attack button — big thumb target on mobile */
   .btn-attack {
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.62rem;
+    font-size: 0.6rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 6px 14px;
+    letter-spacing: 0.08em;
+    padding: 12px 14px;
     background: var(--accent);
     color: #fff;
-    border: none; cursor: pointer;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     transition: all 0.15s;
-    text-transform: uppercase;
-  }
-  .btn-attack:hover { background: #ff5555; box-shadow: 0 0 15px rgba(255,60,60,0.5); }
-
-  /* Loading dots */
-  .loading {
-    display: inline-block;
-    width: 60px; text-align: left;
-    color: var(--muted);
-    font-size: 0.8rem;
-  }
-  .loading::after {
-    content: '';
-    animation: dots 1s infinite;
-  }
-  @keyframes dots {
-    0%   { content: '.'; }
-    33%  { content: '..'; }
-    66%  { content: '...'; }
-  }
-
-  .error-cell { color: var(--accent); font-size: 0.75rem; }
-
-  /* Empty state */
-  .empty {
+    touch-action: manipulation;
+    min-width: 70px;
     text-align: center;
-    padding: 60px;
-    color: var(--muted);
+    line-height: 1.3;
   }
-  .empty p { font-size: 0.85rem; margin-top: 8px; }
+  .btn-attack:active { transform: scale(0.95); }
+  .btn-attack:hover  { background: #ff5555; box-shadow: 0 0 14px rgba(255,60,60,0.4); }
+  .btn-attack.disabled {
+    background: #1e2a38;
+    color: #3a4a5a;
+    cursor: not-allowed;
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  /* ── DESKTOP TABLE (≥768px) ──────────────── */
+  .card-list  { display: flex; }
+  .table-wrap { display: none; overflow-x: auto; }
+
+  @media (min-width: 768px) {
+    .container { padding: 20px; }
+    .card-list  { display: none !important; }
+    .table-wrap { display: block; }
+    .stats-bar  { grid-template-columns: repeat(5, auto); justify-content: start; gap: 10px; }
+    .stat-chip  { padding: 6px 14px; text-align: left; }
+    .stat-chip span { display: inline; font-size: 0.9rem; margin-left: 6px; }
+    .api-bar label { display: inline; margin-bottom: 0; margin-right: 8px; }
+    .api-bar-row { align-items: center; }
+    .search-box { width: 220px; display: inline-block; margin-bottom: 0; font-size: 0.85rem; padding: 7px 12px; }
+    .filter-scroll { flex-wrap: wrap; overflow: visible; }
+    .filter-btn { padding: 7px 14px; border-radius: 4px; font-size: 0.75rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead th {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.63rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    thead th:hover { color: var(--text); }
+    thead th.sort-asc::after  { content: ' ▲'; color: var(--accent); }
+    thead th.sort-desc::after { content: ' ▼'; color: var(--accent); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody td { padding: 10px 14px; border-left: 1px solid var(--border); vertical-align: middle; }
+    tbody td:first-child { border-left: none; }
+    .col-num    { color: var(--muted); width: 40px; text-align: center; }
+    .col-name a { color: var(--blue); text-decoration: none; }
+    .col-name a:hover { text-decoration: underline; }
+    .col-id     { color: var(--muted); }
+    .col-level  { font-family: 'Orbitron', sans-serif; font-weight: 700; }
+    .col-last   { white-space: nowrap; }
+    .btn-attack { padding: 6px 14px; font-size: 0.6rem; min-width: unset; }
+  }
+
+  /* ── Sticky bottom bar (mobile scan button) ─ */
+  .sticky-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  @media (min-width: 768px) { .sticky-bar { display: none; } }
+  .sticky-bar .btn-primary { flex: 1; font-size: 0.7rem; padding: 13px; }
 
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg2); }
-  ::-webkit-scrollbar-thumb { background: var(--border); }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-  @media (max-width: 600px) {
-    header h1 { font-size: 1.3rem; }
-    .api-bar { flex-wrap: wrap; }
-    .api-bar input { min-width: 0; }
+  /* List selector */
+  .list-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    padding: 11px 10px;
+    outline: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    max-width: 200px;
+  }
+  .list-select:focus { border-color: var(--accent); }
+  @media (max-width: 767px) {
+    .api-bar-row { flex-wrap: wrap; }
+    .list-select { width: 100%; max-width: 100%; padding: 10px; }
   }
 </style>
 </head>
@@ -291,33 +369,41 @@
 
   <header>
     <h1>TORN <span>//</span> INACTIVE HUNTER</h1>
-    <p>INACTIVE PLAYER ATTACK DASHBOARD &nbsp;|&nbsp; 125 TARGETS LOADED</p>
+    <p id="headerSub">SELECT A LIST TO BEGIN</p>
   </header>
 
   <!-- API Key Bar -->
-  <div class="api-bar">
+  <div class="api-bar" id="apiBarDesktop">
     <label>API KEY //</label>
-    <input type="password" id="apiKey" placeholder="Enter your Torn API key..." autocomplete="off">
-    <button class="btn btn-primary" id="fetchBtn" onclick="fetchAll()">▶ SCAN ALL</button>
+    <div class="api-bar-row">
+      <input type="password" id="apiKey" placeholder="Paste your Torn API key..." autocomplete="off">
+      <select id="listSelect" class="list-select">
+        <option value="">— Select list —</option>
+      </select>
+      <!-- Desktop scan button (hidden on mobile) -->
+      <button class="btn-primary" id="fetchBtnDesktop" style="display:none">▶ SCAN</button>
+    </div>
   </div>
 
   <!-- Stats Bar -->
   <div class="stats-bar" id="statsBar" style="display:none">
-    <div class="stat-chip s-total">TOTAL <span id="s-total">0</span></div>
-    <div class="stat-chip s-ok">OKAY <span id="s-ok">0</span></div>
-    <div class="stat-chip s-hosp">HOSPITAL <span id="s-hosp">0</span></div>
-    <div class="stat-chip s-jail">JAIL <span id="s-jail">0</span></div>
-    <div class="stat-chip s-travel">TRAVELING <span id="s-travel">0</span></div>
+    <div class="stat-chip s-total">TOTAL<span id="s-total">0</span></div>
+    <div class="stat-chip s-ok">OKAY<span id="s-ok">0</span></div>
+    <div class="stat-chip s-hosp">HOSP<span id="s-hosp">0</span></div>
+    <div class="stat-chip s-jail">JAIL<span id="s-jail">0</span></div>
+    <div class="stat-chip s-travel">TRVL<span id="s-travel">0</span></div>
   </div>
 
-  <!-- Filter Row -->
-  <div class="filter-row">
-    <input type="text" id="searchBox" placeholder="Search name or ID..." oninput="applyFilters()">
-    <button class="filter-btn f-all active" onclick="setFilter('all', this)">ALL</button>
-    <button class="filter-btn f-okay" onclick="setFilter('okay', this)">✓ OKAY</button>
-    <button class="filter-btn f-hosp" onclick="setFilter('hosp', this)">✚ HOSPITAL</button>
-    <button class="filter-btn f-jail" onclick="setFilter('jail', this)">⚑ JAIL</button>
-    <button class="filter-btn f-travel" onclick="setFilter('travel', this)">✈ TRAVEL</button>
+  <!-- Filter + Search -->
+  <div class="filter-wrap">
+    <input class="search-box" type="text" id="searchBox" placeholder="🔍  Search name or ID..." oninput="applyFilters()">
+    <div class="filter-scroll">
+      <button class="filter-btn f-all active"  onclick="setFilter('all', this)">ALL</button>
+      <button class="filter-btn f-okay"         onclick="setFilter('okay', this)">✓ OKAY</button>
+      <button class="filter-btn f-hosp"         onclick="setFilter('hosp', this)">✚ HOSPITAL</button>
+      <button class="filter-btn f-jail"         onclick="setFilter('jail', this)">⚑ JAIL</button>
+      <button class="filter-btn f-travel"       onclick="setFilter('travel', this)">✈ TRAVEL</button>
+    </div>
   </div>
 
   <!-- Progress -->
@@ -326,18 +412,21 @@
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   </div>
 
-  <!-- Table -->
+  <!-- MOBILE: Card list -->
+  <div class="card-list" id="cardList"></div>
+
+  <!-- DESKTOP: Table -->
   <div class="table-wrap">
     <table id="mainTable">
       <thead>
         <tr>
           <th class="col-num">#</th>
-          <th onclick="sortBy('name')"">NAME</th>
+          <th onclick="sortBy('name')">NAME</th>
           <th onclick="sortBy('id')">ID</th>
           <th onclick="sortBy('level')">LVL</th>
           <th>STATUS</th>
           <th onclick="sortBy('lastAction')">LAST ACTIVE</th>
-          <th>ACTION</th>
+          <th>ATTACK</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
@@ -346,188 +435,86 @@
 
 </div>
 
+<!-- Sticky bottom bar — mobile only -->
+<div class="sticky-bar" id="stickyBar">
+  <button class="btn-primary" id="fetchBtn" onclick="fetchAll()">⚔ SCAN &amp; HUNT</button>
+</div>
+
 <script>
-const PLAYERS = [{"name":"maverick1972","id":522960},{"name":"OwlByNite","id":1046495},{"name":"Dragon_Reborn","id":234429},{"name":"babymolly","id":879148},{"name":"matt007","id":298167},{"name":"themastercheif","id":566484},{"name":"warriorscode","id":738073},{"name":"mikeycallin1","id":659852},{"name":"DevilsBlood","id":76096},{"name":"soldierx","id":153910},{"name":"ilekilluall8","id":316768},{"name":"raysil","id":796316},{"name":"nathwin","id":1379450},{"name":"wilash","id":807823},{"name":"iBennett","id":472351},{"name":"james2503","id":476620},{"name":"srfshannon","id":581300},{"name":"theking99218","id":1399310},{"name":"ckirklin","id":485156},{"name":"Bob_the_butler","id":1199189},{"name":"heva07","id":454302},{"name":"nemesis2000","id":191060},{"name":"Boylinger","id":669996},{"name":"Aceraven","id":1489357},{"name":"Darkstar123","id":1269587},{"name":"artsmart020","id":1306114},{"name":"xXDannyBoiiXx","id":567611},{"name":"cascao","id":888467},{"name":"killer133","id":983314},{"name":"LilPimpinjr","id":44940},{"name":"evil-one","id":590277},{"name":"lowlaynsten","id":586812},{"name":"silverwings19","id":587991},{"name":"sidmire","id":178235},{"name":"JoeCool555","id":656275},{"name":"jackiboi2k8","id":969920},{"name":"DJJR","id":719349},{"name":"AnnabellLee","id":627612},{"name":"dj95","id":646007},{"name":"mroq","id":318410},{"name":"-SasukeUchiha-","id":556637},{"name":"transvaaler","id":1199867},{"name":"xVx-Assassin","id":853558},{"name":"lordzenn","id":475911},{"name":"natashamarie","id":993561},{"name":"killatrone_4000","id":861978},{"name":"agreaves","id":1265642},{"name":"4fingers","id":670186},{"name":"maxrocks","id":352232},{"name":"mzwpunk","id":1104804},{"name":"Monica","id":659243},{"name":"Dragon721","id":542048},{"name":"yaesu001","id":353299},{"name":"63476","id":63476},{"name":"scottywalker","id":595042},{"name":"K00L-","id":693146},{"name":"nuryn","id":652570},{"name":"phyzco","id":247701},{"name":"RockinGamer","id":591855},{"name":"Misspriss","id":456008},{"name":"Adam12321","id":508367},{"name":"CdWilliams101","id":172402},{"name":"Miff99","id":507739},{"name":"green_punk768","id":534510},{"name":"kashmoney","id":938020},{"name":"ptownboi04","id":509029},{"name":"zapman119","id":239449},{"name":"lucy1011","id":1073189},{"name":"melinko","id":323067},{"name":"pimpin","id":577479},{"name":"SEXYPERSON101","id":916404},{"name":"guppy12345","id":490998},{"name":"omgitswill","id":298602},{"name":"Nikon","id":96674},{"name":"hoangnhu","id":469387},{"name":"Mijumaru","id":238623},{"name":"Pyrogod","id":678613},{"name":"leeroydon","id":671763},{"name":"Richev12","id":982909},{"name":"Mattyea","id":428350},{"name":"weerossy","id":579753},{"name":"smw23","id":1413853},{"name":"shaun103","id":693966},{"name":"nature95boy","id":894666},{"name":"ken-XXX","id":921628},{"name":"mrman","id":580371},{"name":"mavinny","id":677104},{"name":"wayneker","id":525298},{"name":"Marine2015","id":790460},{"name":"Joshuaaare","id":582138},{"name":"omoroxs","id":1101484},{"name":"When7Meets7","id":342880},{"name":"CHRIS382","id":904225},{"name":"Jonny4toes","id":512249},{"name":"qwertypoo","id":313327},{"name":"MRFoxtrot","id":849660},{"name":"bighorse","id":857866},{"name":"fredmonkey","id":648698},{"name":"slykid","id":581343},{"name":"hisham654","id":422145},{"name":"nickp36","id":1171459},{"name":"tnm021","id":794755},{"name":"joshymitty","id":1022737},{"name":"sLiPkNoTbOy","id":497977},{"name":"Hass101","id":974933},{"name":"fredie","id":524902},{"name":"samartin","id":685929},{"name":"tutan","id":1389629},{"name":"livehere","id":969780},{"name":"djyoda","id":750371},{"name":"DarthZannah","id":555271},{"name":"cooterjessie","id":367428},{"name":"Foxy-Roxy04","id":1169008},{"name":"Febreeze","id":935251},{"name":"dannieex","id":430140},{"name":"Frozenmalice","id":789256},{"name":"dillin1333","id":1183664},{"name":"forgotten_mists","id":296249},{"name":"dick646","id":870109},{"name":"dmora","id":1075217},{"name":"gogo234","id":1423394},{"name":"aaronyuan","id":901426},{"name":"fathead","id":1394290},{"name":"Braskius","id":430622},{"name":"Footballman12","id":552906}];
-
-// Fix any bad entries
-const players = PLAYERS.map(p => ({
-  name: p.name || Object.keys(p).find(k => k !== 'id') || '???',
-  id: p.id
-}));
-
-let playerData = players.map(p => ({ ...p, level: null, statusState: null, statusDesc: null, lastAction: null, lastRelative: null, hospitalUntil: 0, jailUntil: 0, loaded: false, error: false }));
+// ─── State ───────────────────────────────────────────────────────────────────
+let allLists   = {};     // full data.json contents
+let players    = [];     // active list players (raw from JSON)
+let tableData  = [];     // enriched after API fetch
 let currentFilter = 'all';
-let sortCol = null;
-let sortDir = 1;
+let sortCol = null, sortDir = 1;
 let fetching = false;
+let tickTimer = null;
 
-// Init table with loading state
-function initTable() {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = players.map((p, i) => rowHTML(i)).join('');
-}
+// ─── Init: load lists from data.json ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Restore API key
+  const saved = localStorage.getItem('apiKey');
+  if (saved) document.getElementById('apiKey').value = saved;
 
-function rowHTML(i) {
-  const p = playerData[i];
-  const name = p.name || '???';
-  const id = p.id;
+  // Restore last selected list
+  const savedList = localStorage.getItem('selectedList');
 
-  let levelCell = p.loaded ? `<span style="color:var(--accent2)">${p.level ?? '?'}</span>` : (p.error ? '<span class="error-cell">ERR</span>' : '<span class="loading"></span>');
+  // Desktop scan button visibility
+  const mq = window.matchMedia('(min-width: 768px)');
+  const toggleDesktopBtn = e => {
+    document.getElementById('fetchBtnDesktop').style.display = e.matches ? 'block' : 'none';
+  };
+  mq.addEventListener('change', toggleDesktopBtn);
+  toggleDesktopBtn(mq);
+  document.getElementById('fetchBtnDesktop').addEventListener('click', fetchAll);
+  document.getElementById('fetchBtn').addEventListener('click', fetchAll);
 
-  let statusCell = '';
-  if (!p.loaded && !p.error) {
-    statusCell = '<span class="loading"></span>';
-  } else if (p.error) {
-    statusCell = '<span class="error-cell">API Error</span>';
-  } else {
-    const state = (p.statusState || '').toLowerCase();
-    let badgeClass = 'badge-unknown', badgeLabel = state.toUpperCase() || 'UNKNOWN';
-    if (state === 'okay') { badgeClass = 'badge-ok'; badgeLabel = 'OKAY'; }
-    else if (state === 'hospital') { badgeClass = 'badge-hosp'; badgeLabel = 'HOSPITAL'; }
-    else if (state === 'jail') { badgeClass = 'badge-jail'; badgeLabel = 'JAIL'; }
-    else if (state === 'traveling' || state === 'abroad') { badgeClass = 'badge-travel'; badgeLabel = 'TRAVELING'; }
-    else if (state === 'federal') { badgeClass = 'badge-federal'; badgeLabel = 'FEDERAL'; }
-    let timeLeft = '';
-    const now = Math.floor(Date.now() / 1000);
-    if (state === 'hospital' && p.hospitalUntil > now) {
-      const secs = p.hospitalUntil - now;
-      timeLeft = ` <span style="color:var(--accent);font-size:0.7rem">[${fmtTime(secs)}]</span>`;
-    } else if (state === 'jail' && p.jailUntil > now) {
-      const secs = p.jailUntil - now;
-      timeLeft = ` <span style="color:var(--yellow);font-size:0.7rem">[${fmtTime(secs)}]</span>`;
+  // Load data.json
+  try {
+    const res = await fetch('data.json');
+    if (!res.ok) throw new Error('data.json not found');
+    allLists = await res.json();
+
+    const select = document.getElementById('listSelect');
+    select.innerHTML = '<option value="">— Select list —</option>';
+    Object.keys(allLists).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = `${name} (${allLists[name].length})`;
+      select.appendChild(opt);
+    });
+
+    // Restore last list
+    if (savedList && allLists[savedList]) {
+      select.value = savedList;
+      onListChange();
     }
-    statusCell = `<span class="badge ${badgeClass}">${badgeLabel}</span>${timeLeft}<div class="status-desc">${escHtml(p.statusDesc || '')}</div>`;
-  }
 
-  let lastCell = '';
-  if (p.loaded) {
-    lastCell = `<span style="color:var(--muted);font-size:0.75rem">${escHtml(p.lastRelative || '?')}</span>`;
+    select.addEventListener('change', onListChange);
+  } catch (e) {
+    document.getElementById('headerSub').textContent = '⚠ Could not load data.json — make sure it\'s in the same folder';
+    console.error(e);
   }
+});
 
-  return `<tr data-idx="${i}" data-state="${(p.statusState||'').toLowerCase()}" data-name="${name.toLowerCase()}" data-id="${id}">
-    <td class="col-num">${i+1}</td>
-    <td class="col-name"><a href="https://www.torn.com/profiles.php?XID=${id}" target="_blank">${escHtml(name)}</a></td>
-    <td class="col-id">${id}</td>
-    <td class="col-level">${levelCell}</td>
-    <td class="col-status">${statusCell}</td>
-    <td class="col-last">${lastCell}</td>
-    <td class="col-action"><a class="btn-attack" href="https://www.torn.com/loader.php?sid=attack&user2ID=${id}" target="_blank">⚔ ATTACK</a></td>
-  </tr>`;
+function onListChange() {
+  const name = document.getElementById('listSelect').value;
+  if (!name || !allLists[name]) return;
+  localStorage.setItem('selectedList', name);
+  players = allLists[name];
+  const count = players.length;
+  document.getElementById('headerSub').textContent =
+    `${name.toUpperCase()}  ·  ${count} TARGETS`;
+  // Clear any previous results
+  tableData = [];
+  document.getElementById('cardList').innerHTML = '';
+  document.getElementById('tableBody').innerHTML = '';
+  document.getElementById('statsBar').style.display = 'none';
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-async function fetchAll() {
-  const key = document.getElementById('apiKey').value.trim();
-  if (!key) { alert('Please enter your API key first!'); return; }
-  if (fetching) return;
-  fetching = true;
-  document.getElementById('fetchBtn').disabled = true;
-  document.getElementById('fetchBtn').textContent = '⏳ SCANNING...';
-  document.getElementById('progressWrap').classList.add('show');
-  document.getElementById('statsBar').style.display = 'flex';
-
-  initTable();
-
-  let done = 0;
-  const BATCH = 5;
-
-  async function fetchOne(i) {
-    const p = players[i];
-    try {
-      const res = await fetch(`https://api.torn.com/user/${p.id}?selections=profile&key=${key}&comment=InactiveHunter`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.error);
-      playerData[i].level = data.level;
-      playerData[i].statusState = data.status?.state || 'Unknown';
-      playerData[i].statusDesc = data.status?.description || '';
-      playerData[i].lastAction = data.last_action?.timestamp || 0;
-      playerData[i].lastRelative = data.last_action?.relative || '';
-      playerData[i].hospitalUntil = data.states?.hospital_timestamp || 0;
-      playerData[i].jailUntil = data.states?.jail_timestamp || 0;
-      playerData[i].loaded = true;
-    } catch(e) {
-      playerData[i].error = true;
-    }
-    done++;
-    updateProgress(done);
-    updateRow(i);
-    updateStats();
-  }
-
-  // Process in batches
-  for (let i = 0; i < players.length; i += BATCH) {
-    const batch = [];
-    for (let j = i; j < Math.min(i + BATCH, players.length); j++) batch.push(fetchOne(j));
-    await Promise.all(batch);
-    await sleep(600); // Rate limit respect
-    autoSort();
-  }
-
-  fetching = false;
-  document.getElementById('fetchBtn').disabled = false;
-  document.getElementById('fetchBtn').textContent = '↺ RE-SCAN';
-  document.getElementById('progressWrap').classList.remove('show');
-  autoSort();
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function updateProgress(done) {
-  const pct = (done / players.length * 100).toFixed(1);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `SCANNING ${done} / ${players.length} — ${pct}%`;
-}
-
-function updateRow(i) {
-  const tbody = document.getElementById('tableBody');
-  const existing = tbody.querySelector(`tr[data-idx="${i}"]`);
-  if (existing) {
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = rowHTML(i).replace(/^<tr[^>]*>/, '').replace(/<\/tr>$/, '');
-    // Replace by updating attrs + innerHTML
-    existing.outerHTML = rowHTML(i);
-  }
-  applyFilters();
-}
-
-function updateStats() {
-  const loaded = playerData.filter(p => p.loaded);
-  const ok = loaded.filter(p => p.statusState?.toLowerCase() === 'okay').length;
-  const hosp = loaded.filter(p => p.statusState?.toLowerCase() === 'hospital').length;
-  const jail = loaded.filter(p => p.statusState?.toLowerCase() === 'jail').length;
-  const travel = loaded.filter(p => ['traveling','abroad'].includes(p.statusState?.toLowerCase())).length;
-  document.getElementById('s-total').textContent = loaded.length;
-  document.getElementById('s-ok').textContent = ok;
-  document.getElementById('s-hosp').textContent = hosp;
-  document.getElementById('s-jail').textContent = jail;
-  document.getElementById('s-travel').textContent = travel;
-}
-
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  applyFilters();
-}
-
-function applyFilters() {
-  const search = document.getElementById('searchBox').value.toLowerCase();
-  const rows = document.querySelectorAll('#tableBody tr');
-  rows.forEach(row => {
-    const state = row.dataset.state || '';
-    const name = row.dataset.name || '';
-    const id = row.dataset.id || '';
-    let show = true;
-    if (currentFilter === 'okay' && state !== 'okay') show = false;
-    if (currentFilter === 'hosp' && state !== 'hospital') show = false;
-    if (currentFilter === 'jail' && state !== 'jail') show = false;
-    if (currentFilter === 'travel' && !['traveling','abroad'].includes(state)) show = false;
-    if (search && !name.includes(search) && !id.includes(search)) show = false;
-    row.style.display = show ? '' : 'none';
-  });
 }
 
 function fmtTime(secs) {
@@ -540,69 +527,352 @@ function fmtTime(secs) {
   return `${s}s`;
 }
 
-function statusPriority(p) {
-  const s = (p.statusState || '').toLowerCase();
-  if (s === 'okay') return 0;
-  if (s === 'hospital') return 1;
-  if (s === 'jail') return 2;
-  if (s === 'traveling' || s === 'abroad') return 3;
-  if (s === 'federal') return 4;
-  return 5; // unloaded / unknown
+// Parse remaining seconds from a "Xm Ys" countdown string already in the DOM
+function parseTimerText(txt) {
+  const hm = txt.match(/(\d+)h\s+(\d+)m/);
+  if (hm) return parseInt(hm[1]) * 3600 + parseInt(hm[2]) * 60;
+  const ms = txt.match(/(\d+)m\s+(\d+)s/);
+  if (ms) return parseInt(ms[1]) * 60 + parseInt(ms[2]);
+  const ss = txt.match(/^(\d+)s$/);
+  if (ss) return parseInt(ss[1]);
+  return null;
 }
 
-function autoSort() {
+// ─── Status priority for sort ────────────────────────────────────────────────
+function statusPriority(state) {
+  const s = (state || '').toLowerCase();
+  if (s === 'okay')                          return 0;
+  if (s === 'hospital')                      return 1;
+  if (s === 'jail')                          return 2;
+  if (s === 'traveling' || s === 'abroad')   return 3;
+  if (s === 'federal')                       return 4;
+  return 5;
+}
+
+// ─── Build mobile card ────────────────────────────────────────────────────────
+function cardHTML(p, idx) {
+  const state = (p.statusState || '').toLowerCase();
+  let badgeClass, badgeLabel;
+  if      (state === 'okay')                         { badgeClass = 'badge-ok';      badgeLabel = 'OKAY'; }
+  else if (state === 'hospital')                     { badgeClass = 'badge-hosp';    badgeLabel = 'HOSPITAL'; }
+  else if (state === 'jail')                         { badgeClass = 'badge-jail';    badgeLabel = 'JAIL'; }
+  else if (state === 'traveling' || state==='abroad'){ badgeClass = 'badge-travel';  badgeLabel = 'TRAVELING'; }
+  else if (state === 'federal')                      { badgeClass = 'badge-federal'; badgeLabel = 'FEDERAL'; }
+  else                                               { badgeClass = 'badge-unknown'; badgeLabel = (state||'UNKNOWN').toUpperCase(); }
+
   const now = Math.floor(Date.now() / 1000);
-  playerData.sort((a, b) => {
-    const pa = statusPriority(a), pb = statusPriority(b);
-    if (pa !== pb) return pa - pb;
-    // Within hospital: sort by shortest time remaining first
-    if (pa === 1) {
-      const ta = a.hospitalUntil > now ? a.hospitalUntil - now : 0;
-      const tb = b.hospitalUntil > now ? b.hospitalUntil - now : 0;
-      return ta - tb;
+  let timerSpan = '';
+  if ((state === 'hospital' || state === 'jail') && p.statusUntil > now) {
+    const secs = p.statusUntil - now;
+    const color = state === 'hospital' ? 'var(--accent)' : 'var(--yellow)';
+    timerSpan = `<span class="timer-cell" style="color:${color}">[${fmtTime(secs)}]</span>`;
+  }
+
+  const canAttack = (state === 'okay');
+  const attackBtn = canAttack
+    ? `<a class="btn-attack" href="https://www.torn.com/loader2.php?sid=getInAttack&user2ID=${p.id}" target="_blank">⚔<br>ATK</a>`
+    : `<span class="btn-attack disabled">⚔<br>ATK</span>`;
+
+  return `<div class="player-card state-${state}" data-state="${state}" data-name="${escHtml(p.name.toLowerCase())}" data-id="${p.id}">
+    <div class="card-top">
+      <a class="card-name" href="https://www.torn.com/profiles.php?XID=${p.id}" target="_blank">${escHtml(p.name)}</a>
+      <div class="card-id">#${idx + 1} &nbsp;·&nbsp; ID: ${p.id}</div>
+    </div>
+    <div class="card-attack">${attackBtn}</div>
+    <div class="card-mid">
+      <div class="card-status-row">
+        <span class="badge ${badgeClass}">${badgeLabel}</span>
+        ${timerSpan}
+      </div>
+      ${p.statusDesc ? `<div class="status-desc">${escHtml(p.statusDesc)}</div>` : ''}
+    </div>
+    <div class="card-bot">
+      <div class="card-meta">
+        <span>LVL <strong>${p.level ?? p.lvl ?? '?'}</strong></span>
+        ${p.total ? `<span>STATS <strong>${p.total}</strong></span>` : ''}
+        <span style="color:var(--muted);font-size:0.7rem">${escHtml(p.lastRelative || '?')}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Build desktop table row ──────────────────────────────────────────────────
+function rowHTML(p, idx) {
+  const state = (p.statusState || '').toLowerCase();
+  let badgeClass, badgeLabel;
+  if      (state === 'okay')                        { badgeClass = 'badge-ok';      badgeLabel = 'OKAY'; }
+  else if (state === 'hospital')                    { badgeClass = 'badge-hosp';    badgeLabel = 'HOSPITAL'; }
+  else if (state === 'jail')                        { badgeClass = 'badge-jail';    badgeLabel = 'JAIL'; }
+  else if (state === 'traveling' || state==='abroad'){ badgeClass = 'badge-travel'; badgeLabel = 'TRAVELING'; }
+  else if (state === 'federal')                     { badgeClass = 'badge-federal'; badgeLabel = 'FEDERAL'; }
+  else                                              { badgeClass = 'badge-unknown'; badgeLabel = (state || 'UNKNOWN').toUpperCase(); }
+
+  const now = Math.floor(Date.now() / 1000);
+  let timerSpan = '';
+  let remainSecs = 0;
+  if (state === 'hospital' && p.statusUntil > now) {
+    remainSecs = p.statusUntil - now;
+    timerSpan = `<span class="timer-cell" style="color:var(--accent);font-size:0.7rem">[${fmtTime(remainSecs)}]</span>`;
+  } else if (state === 'jail' && p.statusUntil > now) {
+    remainSecs = p.statusUntil - now;
+    timerSpan = `<span class="timer-cell" style="color:var(--yellow);font-size:0.7rem">[${fmtTime(remainSecs)}]</span>`;
+  }
+
+  // Attack button: disabled while in hospital/jail/traveling
+  const canAttack = (state === 'okay');
+  const attackBtn = canAttack
+    ? `<a class="btn-attack" href="https://www.torn.com/loader2.php?sid=getInAttack&user2ID=${p.id}" target="_blank">⚔ ATTACK</a>`
+    : `<span class="btn-attack" style="opacity:0.3;cursor:not-allowed">⚔ ATTACK</span>`;
+
+  return `<tr data-state="${state}" data-name="${escHtml(p.name.toLowerCase())}" data-id="${p.id}">
+    <td class="col-num">${idx + 1}</td>
+    <td class="col-name"><a href="https://www.torn.com/profiles.php?XID=${p.id}" target="_blank">${escHtml(p.name)}</a></td>
+    <td class="col-id">${p.id}</td>
+    <td class="col-level"><span style="color:var(--accent2)">${p.level ?? '?'}</span></td>
+    <td class="col-status">
+      <span class="badge ${badgeClass}">${badgeLabel}</span> ${timerSpan}
+      <div class="status-desc">${escHtml(p.statusDesc || '')}</div>
+    </td>
+    <td class="col-last"><span style="color:var(--muted);font-size:0.75rem">${escHtml(p.lastRelative || '?')}</span></td>
+    <td class="col-action">${attackBtn}</td>
+  </tr>`;
+}
+
+// ─── Render both card list (mobile) and table (desktop) ──────────────────────
+function renderTable() {
+  document.getElementById('cardList').innerHTML =
+    tableData.map((p, i) => cardHTML(p, i)).join('');
+  document.getElementById('tableBody').innerHTML =
+    tableData.map((p, i) => rowHTML(p, i)).join('');
+  document.getElementById('statsBar').style.display = '';
+  applyFilters();
+  updateStats();
+}
+
+// ─── MAIN FETCH — all requests fired simultaneously with Promise.all ──────────
+async function fetchAll() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) { alert('Please paste your API key first!'); return; }
+  if (!players.length) { alert('Please select a list first!'); return; }
+  if (fetching) return;
+
+  localStorage.setItem('apiKey', key);
+
+  fetching = true;
+  const btnMobile  = document.getElementById('fetchBtn');
+  const btnDesktop = document.getElementById('fetchBtnDesktop');
+  [btnMobile, btnDesktop].forEach(b => { b.disabled = true; b.textContent = '⏳ SCANNING...'; });
+  document.getElementById('progressWrap').classList.add('show');
+  document.getElementById('statsBar').style.display = '';
+  clearInterval(tickTimer);
+
+  updateProgress(0);
+
+  let done = 0;
+
+  const promises = players.map(async (p) => {
+    try {
+      const res  = await fetch(`https://api.torn.com/user/${p.id}?selections=basic&key=${key}&comment=InactiveHunter`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.error);
+      return {
+        name:        p.name,
+        id:          String(p.id),
+        lvl:         p.lvl,
+        total:       p.total,
+        str:         p.str,
+        def:         p.def,
+        spd:         p.spd,
+        dex:         p.dex,
+        level:       data.level,
+        statusState: data.status?.state || 'Unknown',
+        statusDesc:  data.status?.description || '',
+        statusUntil: data.status?.until || 0,
+        lastAction:  data.last_action?.timestamp || 0,
+        lastRelative:data.last_action?.relative  || '',
+        error: false,
+      };
+    } catch (e) {
+      return {
+        name: p.name, id: String(p.id),
+        lvl: p.lvl, total: p.total, str: p.str, def: p.def, spd: p.spd, dex: p.dex,
+        level: null, statusState: 'Error', statusDesc: e.message,
+        statusUntil: 0, lastAction: 0, lastRelative: '', error: true,
+      };
+    } finally {
+      done++;
+      updateProgress(done);
     }
-    // Within jail: sort by shortest time remaining first
-    if (pa === 2) {
-      const ta = a.jailUntil > now ? a.jailUntil - now : 0;
-      const tb = b.jailUntil > now ? b.jailUntil - now : 0;
+  });
+
+  // Wait for every single request to resolve
+  const results = await Promise.all(promises);
+
+  // Sort: Okay first → Hospital (shortest remaining) → Jail (shortest) → Traveling → rest
+  const now = Math.floor(Date.now() / 1000);
+  results.sort((a, b) => {
+    const pa = statusPriority(a.statusState), pb = statusPriority(b.statusState);
+    if (pa !== pb) return pa - pb;
+    // Within same priority, sort by time remaining ascending
+    if (pa === 1 || pa === 2) {
+      const ta = a.statusUntil > now ? a.statusUntil - now : 0;
+      const tb = b.statusUntil > now ? b.statusUntil - now : 0;
       return ta - tb;
     }
     return 0;
   });
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = playerData.map((_, i) => rowHTML(i)).join('');
+
+  tableData = results;
+  renderTable();
+
+  fetching = false;
+  document.getElementById('progressWrap').classList.remove('show');
+
+  startTickDown();
+  startCooldown(btnMobile);
+  startCooldown(btnDesktop);
+}
+
+function startTickDown() {
+  clearInterval(tickTimer);
+  tickTimer = setInterval(() => {
+    document.querySelectorAll('.timer-cell').forEach(el => {
+      const match = el.textContent.match(/\[(.+)\]/);
+      if (!match) return;
+      const secs = parseTimerText(match[1]);
+      if (secs === null) return;
+      const next = secs - 1;
+      if (next <= 0) {
+        // Find parent row (table) or card
+        const row  = el.closest('tr');
+        const card = el.closest('.player-card');
+        const id   = row?.dataset.id || card?.dataset.id;
+
+        if (row) {
+          row.dataset.state = 'okay';
+          const badge = row.querySelector('.badge');
+          if (badge) { badge.className = 'badge badge-ok'; badge.textContent = 'OKAY'; }
+          el.remove();
+          const descEl = row.querySelector('.status-desc');
+          if (descEl) descEl.textContent = '';
+          const actionCell = row.querySelector('.col-action');
+          if (actionCell && id)
+            actionCell.innerHTML = `<a class="btn-attack" href="https://www.torn.com/loader2.php?sid=getInAttack&user2ID=${id}" target="_blank">⚔ ATTACK</a>`;
+        }
+        if (card) {
+          card.dataset.state = 'okay';
+          card.className = card.className.replace(/state-\S+/, 'state-okay');
+          const badge = card.querySelector('.badge');
+          if (badge) { badge.className = 'badge badge-ok'; badge.textContent = 'OKAY'; }
+          el.remove();
+          const descEl = card.querySelector('.status-desc');
+          if (descEl) descEl.textContent = '';
+          const attackDiv = card.querySelector('.card-attack');
+          if (attackDiv && id)
+            attackDiv.innerHTML = `<a class="btn-attack" href="https://www.torn.com/loader2.php?sid=getInAttack&user2ID=${id}" target="_blank">⚔<br>ATK</a>`;
+        }
+        updateStats();
+      } else {
+        el.textContent = `[${fmtTime(next)}]`;
+      }
+    });
+  }, 1000);
+}
+
+function startCooldown(btn) {
+  const startTime = Date.now();
+  const COOLDOWN = 30;
+  const isMobile = btn.id === 'fetchBtn';
+  const finalText = isMobile ? '⚔ SCAN & HUNT' : '↺ RE-SCAN';
+  const interval = setInterval(() => {
+    const remaining = COOLDOWN - Math.floor((Date.now() - startTime) / 1000);
+    if (remaining <= 0) {
+      clearInterval(interval);
+      btn.textContent = finalText;
+      btn.disabled = false;
+    } else {
+      btn.textContent = `${finalText} (${remaining}s)`;
+    }
+  }, 1000);
+}
+
+// ─── Progress bar ─────────────────────────────────────────────────────────────
+function updateProgress(done) {
+  const total = players.length;
+  const pct = total ? (done / total * 100).toFixed(1) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent =
+    done < total ? `SCANNING ${done} / ${total} — ${pct}%` : `✓ SCAN COMPLETE — ${total} targets`;
+}
+
+// ─── Stats bar ────────────────────────────────────────────────────────────────
+function updateStats() {
+  const ok     = tableData.filter(p => p.statusState?.toLowerCase() === 'okay').length;
+  const hosp   = tableData.filter(p => p.statusState?.toLowerCase() === 'hospital').length;
+  const jail   = tableData.filter(p => p.statusState?.toLowerCase() === 'jail').length;
+  const travel = tableData.filter(p => ['traveling','abroad'].includes(p.statusState?.toLowerCase())).length;
+  document.getElementById('s-total').textContent  = tableData.length;
+  document.getElementById('s-ok').textContent     = ok;
+  document.getElementById('s-hosp').textContent   = hosp;
+  document.getElementById('s-jail').textContent   = jail;
+  document.getElementById('s-travel').textContent = travel;
+}
+
+// ─── Filter & search ─────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
   applyFilters();
 }
 
+function applyFilters() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  // Filter table rows
+  document.querySelectorAll('#tableBody tr').forEach(row => {
+    row.style.display = matchesFilter(row.dataset.state, row.dataset.name, row.dataset.id, search) ? '' : 'none';
+  });
+  // Filter cards
+  document.querySelectorAll('#cardList .player-card').forEach(card => {
+    card.style.display = matchesFilter(card.dataset.state, card.dataset.name, card.dataset.id, search) ? '' : 'none';
+  });
+}
+
+function matchesFilter(state, name, id, search) {
+  if (currentFilter === 'okay'   && state !== 'okay')                        return false;
+  if (currentFilter === 'hosp'   && state !== 'hospital')                    return false;
+  if (currentFilter === 'jail'   && state !== 'jail')                        return false;
+  if (currentFilter === 'travel' && !['traveling','abroad'].includes(state)) return false;
+  if (search && !(name||'').includes(search) && !(id||'').includes(search))  return false;
+  return true;
+}
+
+// ─── Manual column sort (overrides auto-sort) ─────────────────────────────────
 function sortBy(col) {
   if (sortCol === col) sortDir *= -1;
   else { sortCol = col; sortDir = 1; }
 
   document.querySelectorAll('thead th').forEach(th => {
     th.classList.remove('sort-asc','sort-desc');
-    if (th.textContent.trim().toLowerCase().startsWith(col === 'lastAction' ? 'last' : col)) {
+    const label = th.textContent.trim().toLowerCase();
+    if ((col === 'lastAction' && label.startsWith('last')) ||
+        (col !== 'lastAction' && label.startsWith(col)))
       th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
-    }
   });
 
-  playerData.sort((a, b) => {
+  tableData.sort((a, b) => {
     let av, bv;
-    if (col === 'name') { av = a.name?.toLowerCase(); bv = b.name?.toLowerCase(); }
-    else if (col === 'id') { av = a.id; bv = b.id; }
-    else if (col === 'level') { av = a.level ?? -1; bv = b.level ?? -1; }
-    else if (col === 'lastAction') { av = a.lastAction ?? 0; bv = b.lastAction ?? 0; }
+    if      (col === 'name')       { av = a.name?.toLowerCase();  bv = b.name?.toLowerCase(); }
+    else if (col === 'id')         { av = a.id;                   bv = b.id; }
+    else if (col === 'level')      { av = a.level ?? -1;          bv = b.level ?? -1; }
+    else if (col === 'lastAction') { av = a.lastAction ?? 0;      bv = b.lastAction ?? 0; }
     if (av < bv) return -sortDir;
     if (av > bv) return sortDir;
     return 0;
   });
 
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = playerData.map((_, i) => rowHTML(i)).join('');
-  applyFilters();
+  renderTable();
 }
-
-// Init
-initTable();
 </script>
 </body>
 </html>
